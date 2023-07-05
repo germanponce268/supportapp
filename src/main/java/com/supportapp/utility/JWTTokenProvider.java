@@ -43,8 +43,8 @@ public class JWTTokenProvider {
         return Arrays.stream(claims).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
-    public Authentication getAuthentication(String username, List<GrantedAuthority> authorities, HttpServletRequest request){
-        UsernamePasswordAuthenticationToken userPasswordAuthToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
+    public Authentication getAuthentication(String username,  List<GrantedAuthority> authorities, HttpServletRequest request){
+        UsernamePasswordAuthenticationToken userPasswordAuthToken = new UsernamePasswordAuthenticationToken(username, authorities);
         userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return userPasswordAuthToken;
     }
@@ -71,7 +71,7 @@ public class JWTTokenProvider {
         JWTVerifier verifier ;
         try{
             Algorithm algorithm = Algorithm.HMAC512(secret);
-            verifier = JWT.require(algorithm).withIssuer().build();
+            verifier = JWT.require(algorithm).withIssuer(SecurityConstant.LADEDEV).build();
         }catch(JWTVerificationException e){
             throw new JWTVerificationException(SecurityConstant.TOKEN_CANNOT_BE_VERIFIED);
         }

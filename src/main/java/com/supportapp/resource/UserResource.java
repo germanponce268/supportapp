@@ -1,21 +1,38 @@
 package com.supportapp.resource;
 
+import com.supportapp.constant.FileConstant;
+import com.supportapp.domain.HttpResponse;
 import com.supportapp.domain.User;
 import com.supportapp.domain.UserPrincipal;
 import com.supportapp.exceptions.EmailExistException;
+import com.supportapp.exceptions.EmailNotFoundException;
 import com.supportapp.exceptions.ExceptionHandling;
 import com.supportapp.exceptions.UsernameExistException;
 import com.supportapp.service.UserService;
 import com.supportapp.utility.JWTTokenProvider;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.List;
 
 import static com.supportapp.constant.SecurityConstant.JWT_TOKEN_HEADER;
 @Controller
@@ -32,7 +49,7 @@ public class UserResource extends ExceptionHandling {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) throws EmailExistException, UsernameExistException {
+    public ResponseEntity<User> register(@RequestBody User user) throws EmailExistException, UsernameExistException, MessagingException {
         User loginUser =  this.userService.register(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
         return new ResponseEntity(loginUser, HttpStatus.OK);
     }
@@ -45,6 +62,71 @@ public class UserResource extends ExceptionHandling {
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
         return new ResponseEntity<>(loginUser, jwtHeader, HttpStatus.OK);
     }
+    @PostMapping("/add")
+    public ResponseEntity<User> addNewUser(@RequestBody User user, @RequestParam(value="profileImage", required = false)MultipartFile profileImage) throws EmailExistException, IOException, UsernameExistException {
+        User newUser = this.userService.addNewUser(user, profileImage);
+        return new ResponseEntity<>(newUser, HttpStatus.OK);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<User> updateUser(@RequestBody User user,
+                                           @RequestParam("currentUsername")String currentUsername,
+                                           @RequestParam(value="profileImage", required = false)MultipartFile profileImage) throws EmailExistException, IOException, UsernameExistException {
+
+        User newUser = this.userService.updateUser(currentUsername, user, profileImage);
+        return new ResponseEntity<>(newUser, HttpStatus.OK);
+    }
+    @GetMapping("/find/{username}")
+    public ResponseEntity<User> getUser(@PathVariable("username") String username){
+        User userFound = this.userService.findUserByUsername(username);
+        return new ResponseEntity<>(userFound, HttpStatus.OK);
+    }
+    @GetMapping("/list")
+    public ResponseEntity<List<User>> getUsers(){
+        List<User> usersList = this.userService.getusers();
+        return new ResponseEntity<>(usersList, HttpStatus.OK);
+    }
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyAuthority('user:delete')")
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") Long id){
+        this.userService.deleteUser(id);
+        return response(HttpStatus.OK, "User deleted succefully");
+    }
+
+    @PostMapping("/updateProfileImage")
+    public ResponseEntity<User> updateProfileImage(@PathVariable("profileImage") MultipartFile profileImage,
+                                               @RequestBody User user) throws EmailExistException, IOException, UsernameExistException {
+        User newUserImg = this.userService.updateProfileImage(user.getUsername(), profileImage);
+        return new ResponseEntity(newUserImg, HttpStatus.OK);
+    }
+    @GetMapping("/resetPassword/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
+        this.userService.resetPassword(email);
+        return response(HttpStatus.OK, "Email sent to: " + email);
+    }
+    @GetMapping(path = "/image/{username}/{fileName}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public byte[] getProfileImage(@PathVariable("username") String username,
+                                  @PathVariable("fileName") String fileName) throws IOException {
+        return Files.readAllBytes(Paths.get(FileConstant.USER_FOLDER + username + FileConstant.FORWARD_SLASH + fileName));
+    }
+    @GetMapping(path = "/image/profile/{username}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getTempProfileImage(@PathVariable("username") String username) throws IOException {
+
+        String imageUrl = FileConstant.TEMP_PROFILE_IMAGE_BASE_URL + username;
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<byte[]> response = restTemplate.getForEntity(imageUrl, byte[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        return new ResponseEntity<>(response.getBody(), headers, HttpStatus.OK);
+
+    }
+
+    private ResponseEntity<HttpResponse> response(HttpStatus status, String message) {
+        HttpResponse body = new HttpResponse(new Date(), status.value(), status, status.getReasonPhrase().toUpperCase(), message.toUpperCase());
+        return new ResponseEntity<>(body, status);
+    }
 
     private HttpHeaders getJwtHeader(UserPrincipal userPrincipal) {
         HttpHeaders headers = new HttpHeaders();
@@ -53,6 +135,7 @@ public class UserResource extends ExceptionHandling {
     }
 
     private void authenticate(String username, String password) {
-        this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        UsernamePasswordAuthenticationToken authToken = UsernamePasswordAuthenticationToken.unauthenticated(username, password);
+        this.authenticationManager.authenticate(authToken);
     }
 }

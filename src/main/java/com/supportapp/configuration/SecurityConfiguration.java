@@ -5,17 +5,16 @@ import com.supportapp.constant.SecurityConstant;
 import com.supportapp.filter.JWTAccessDeniedHandler;
 import com.supportapp.filter.JWTAuthenticationEntryPoint;
 import com.supportapp.filter.JWTAuthorizationFilter;
+import com.supportapp.listeners.AuthenticationSuccessListener;
+import com.supportapp.utility.JWTTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.authentication.AuthenticationManagerFactoryBean;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,27 +30,33 @@ public class SecurityConfiguration {
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private UserDetailsService userDetailsService;
 
+
+
     public SecurityConfiguration(JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint){
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+
     }
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+
             http
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                      .authorizeHttpRequests(auth -> auth.requestMatchers(SecurityConstant.PUBLIC_URLS).permitAll())
                      .csrf(config -> config.disable())
                      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                     .addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                     .addFilterBefore(this.jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                      .exceptionHandling().accessDeniedHandler(jwtAccessDeniedHandler)
                      .authenticationEntryPoint(jwtAuthenticationEntryPoint);
 
-
-                 return http.build();
+                     return http.build();
     }
     @Bean
     public JWTAuthorizationFilter jwtAuthorizationFilter(){
         return new JWTAuthorizationFilter();
+    }
+    @Bean
+    public JWTTokenProvider jwtTokenProvider() {
+        return new JWTTokenProvider();
     }
 
     @Bean
@@ -62,5 +67,6 @@ public class SecurityConfiguration {
     public AuthenticationManagerFactoryBean authenticationManagerFactoryBean(){
         return new AuthenticationManagerFactoryBean();
     }
+
 
 }
