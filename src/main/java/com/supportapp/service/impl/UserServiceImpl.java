@@ -1,8 +1,6 @@
 package com.supportapp.service.impl;
 
-import com.supportapp.constant.EmailConstant;
 import com.supportapp.constant.FileConstant;
-import com.supportapp.constant.UserImplConstant;
 import com.supportapp.domain.User;
 import com.supportapp.domain.UserPrincipal;
 import com.supportapp.enums.Role;
@@ -118,40 +116,40 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return user;
     }
     @Override
-    public User addNewUser(User user, MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException {
-        validateNewUsernameAndEmail(StringUtils.EMPTY, user.getUsername(), user.getEmail());
+    public User addNewUser(String firstName, String lastName, String username, String email, String role, boolean isActive, boolean isNonLocked, MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException {
+        validateNewUsernameAndEmail(StringUtils.EMPTY, username, email);
         User newUser = new User();
         newUser.setId(Long.valueOf(generateId()));
         String password = generatePassword();
         String encodedPassword = encodePassword(password);
-        newUser.setFirstName(user.getFirstName());
-        newUser.setLastName(user.getLastName());
-        newUser.setUsername(user.getUsername());
-        newUser.setEmail(user.getEmail());
+        newUser.setFirstName(firstName);
+        newUser.setLastName(lastName);
+        newUser.setUsername(username);
+        newUser.setEmail(email);
         newUser.setJoinDate(new Date());
         newUser.setPassword(encodedPassword);
         newUser.setActive(true);
         newUser.setNotLocked(true);
-        newUser.setRole(getRoleEnumName(user.getRole()).name());
-        newUser.setAuthorities(getRoleEnumName(user.getRole()).getAuthorities());
-        newUser.setProfileImageUrl(getTemporaryProfileImageUrl(user.getUsername()));
-        this.userRepository.save(user);
-        saveProfileImage(user, profileImage);
+        newUser.setRole(getRoleEnumName(role).name());
+        newUser.setAuthorities(getRoleEnumName(role).getAuthorities());
+        newUser.setProfileImageUrl(getTemporaryProfileImageUrl(username));
+        this.userRepository.save(newUser);
+        saveProfileImage(newUser, profileImage);
         return newUser;
     }
 
 
     @Override
-    public User updateUser(String currentUsername,User user, MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException {
-       User currentUser =  validateNewUsernameAndEmail(currentUsername, user.getUsername() , user.getEmail());
-        currentUser.setFirstName(user.getFirstName());
-        currentUser.setLastName(user.getLastName());
-        currentUser.setUsername(user.getUsername());
-        currentUser.setEmail(user.getEmail());
-        currentUser.setActive(user.isActive());
-        currentUser.setNotLocked(user.isNotLocked());
-        currentUser.setRole(getRoleEnumName(user.getRole()).name());
-        currentUser.setAuthorities(getRoleEnumName(user.getRole()).getAuthorities());
+    public User updateUser(String currentUsername, String firstName,String lastName,String username,String email,String role,boolean isActive,boolean isNonLocked,MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException {
+       User currentUser =  validateNewUsernameAndEmail(currentUsername, username , email);
+        currentUser.setFirstName(firstName);
+        currentUser.setLastName(lastName);
+        currentUser.setUsername(username);
+        currentUser.setEmail(email);
+        currentUser.setActive(isActive);
+        currentUser.setNotLocked(isNonLocked);
+        currentUser.setRole(getRoleEnumName(role).name());
+        currentUser.setAuthorities(getRoleEnumName(role).getAuthorities());
         this.userRepository.save(currentUser);
         saveProfileImage(currentUser, profileImage);
         return currentUser;
@@ -195,17 +193,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private User validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UsernameExistException, EmailExistException {
-        User userByNewUsername = findUserByUsername(newUsername);
         User userByNewEmail = findUserByEmail(newEmail);
+        User userByNewUsername = findUserByUsername(newUsername);
+
         if(StringUtils.isNotBlank(currentUsername)){
             User currentUser = findUserByUsername(currentUsername);
             if(currentUser == null){
                 throw new UsernameNotFoundException(USER_NOT_FOUND_BY_USERNAME + currentUsername);
             }
-            if(userByNewUsername != null && currentUser.getId().equals(userByNewUsername.getId())){
+            if(userByNewUsername != null && !currentUser.getId().equals(userByNewUsername.getId())){
                 throw new UsernameExistException(USERNAME_ALREADY_EXIST);
             }
-            if(userByNewEmail != null && currentUser.getId().equals(userByNewEmail.getId())){
+            if(userByNewEmail != null && !currentUser.getId().equals(userByNewEmail.getId())){
                 throw new EmailExistException(EMAIL_ALREADY_EXIST);
             }
             return currentUser;

@@ -1,6 +1,7 @@
 package com.supportapp.configuration;
 
 
+import com.supportapp.constant.CorsConstant;
 import com.supportapp.constant.SecurityConstant;
 import com.supportapp.filter.JWTAccessDeniedHandler;
 import com.supportapp.filter.JWTAuthenticationEntryPoint;
@@ -19,6 +20,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -27,32 +36,33 @@ public class SecurityConfiguration {
 
     private JWTAuthorizationFilter jwtAuthorizationFilter;
     private JWTAccessDeniedHandler jwtAccessDeniedHandler;
+
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private UserDetailsService userDetailsService;
 
-
-
-    public SecurityConfiguration(JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint){
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-
-    }
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
             http
-                     .authorizeHttpRequests(auth -> auth.requestMatchers(SecurityConstant.PUBLIC_URLS).permitAll())
-                     .csrf(config -> config.disable())
+                     .authorizeHttpRequests(auth -> auth.requestMatchers(SecurityConstant.PUBLIC_URLS).permitAll().anyRequest().authenticated())
+                    .cors()
+                    .and()
+                    .csrf(config -> config.disable())
                      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                      .addFilterBefore(this.jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                      .exceptionHandling().accessDeniedHandler(jwtAccessDeniedHandler)
-                     .authenticationEntryPoint(jwtAuthenticationEntryPoint);
+                     .authenticationEntryPoint(this.jwtAuthenticationEntryPoint());
 
                      return http.build();
     }
     @Bean
     public JWTAuthorizationFilter jwtAuthorizationFilter(){
         return new JWTAuthorizationFilter();
+    }
+    @Bean
+    public JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint(){
+        return new JWTAuthenticationEntryPoint();
     }
     @Bean
     public JWTTokenProvider jwtTokenProvider() {
@@ -66,6 +76,19 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationManagerFactoryBean authenticationManagerFactoryBean(){
         return new AuthenticationManagerFactoryBean();
+    }
+
+    @Bean
+    public CorsFilter corsFilter(){
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin(CorsConstant.SUPPORTAPPWEB_URL);
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedHeaders(Arrays.asList(CorsConstant.ALLOWED_HEADERS));
+        corsConfiguration.setExposedHeaders(Arrays.asList(CorsConstant.EXPOSED_HEADERS));
+        corsConfiguration.setAllowedMethods(Arrays.asList(CorsConstant.HTTP_METHODS));
+        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+        return new CorsFilter(urlBasedCorsConfigurationSource);
     }
 
 

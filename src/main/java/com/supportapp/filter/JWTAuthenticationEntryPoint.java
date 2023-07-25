@@ -18,10 +18,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
     //Jackson
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;;
+    public JWTAuthenticationEntryPoint(){;}
     public JWTAuthenticationEntryPoint(ObjectMapper objectMapper){
         this.objectMapper = objectMapper;
     }

@@ -63,17 +63,31 @@ public class UserResource extends ExceptionHandling {
         return new ResponseEntity<>(loginUser, jwtHeader, HttpStatus.OK);
     }
     @PostMapping("/add")
-    public ResponseEntity<User> addNewUser(@RequestBody User user, @RequestParam(value="profileImage", required = false)MultipartFile profileImage) throws EmailExistException, IOException, UsernameExistException {
-        User newUser = this.userService.addNewUser(user, profileImage);
+    public ResponseEntity<User> addNewUser(@RequestParam("firstName") String firstName,
+                                           @RequestParam("lastName") String lastName,
+                                           @RequestParam("username") String username,
+                                           @RequestParam("email") String email,
+                                           @RequestParam("role") String role,
+                                           @RequestParam("isActive") String isActive,
+                                           @RequestParam("isNonLocked")String isNonLocked,
+                                           @RequestParam(value="profileImage", required = false)MultipartFile profileImage) throws EmailExistException, IOException, UsernameExistException {
+
+        User newUser = this.userService.addNewUser(firstName, lastName,username,email,role,Boolean.parseBoolean(isActive),Boolean.parseBoolean(isNonLocked), profileImage);
         return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
 
     @PostMapping("/update")
-    public ResponseEntity<User> updateUser(@RequestBody User user,
-                                           @RequestParam("currentUsername")String currentUsername,
+    public ResponseEntity<User> updateUser(@RequestParam("firstName") String firstName,
+                                           @RequestParam("currentUsername") String currentUsername,
+                                           @RequestParam("lastName") String lastName,
+                                           @RequestParam("username") String username,
+                                           @RequestParam("email") String email,
+                                           @RequestParam("role") String role,
+                                           @RequestParam("isActive") String isActive,
+                                           @RequestParam("isNonLocked")String isNonLocked,
                                            @RequestParam(value="profileImage", required = false)MultipartFile profileImage) throws EmailExistException, IOException, UsernameExistException {
 
-        User newUser = this.userService.updateUser(currentUsername, user, profileImage);
+        User newUser = this.userService.updateUser(currentUsername,firstName, lastName,username,email,role,Boolean.parseBoolean(isActive),Boolean.parseBoolean(isNonLocked), profileImage);
         return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
     @GetMapping("/find/{username}")
@@ -81,6 +95,7 @@ public class UserResource extends ExceptionHandling {
         User userFound = this.userService.findUserByUsername(username);
         return new ResponseEntity<>(userFound, HttpStatus.OK);
     }
+    @CrossOrigin
     @GetMapping("/list")
     public ResponseEntity<List<User>> getUsers(){
         List<User> usersList = this.userService.getusers();
@@ -104,15 +119,17 @@ public class UserResource extends ExceptionHandling {
         this.userService.resetPassword(email);
         return response(HttpStatus.OK, "Email sent to: " + email);
     }
-    @GetMapping(path = "/image/{username}/{fileName}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public byte[] getProfileImage(@PathVariable("username") String username,
-                                  @PathVariable("fileName") String fileName) throws IOException {
-        return Files.readAllBytes(Paths.get(FileConstant.USER_FOLDER + username + FileConstant.FORWARD_SLASH + fileName));
+    @GetMapping(value = "/updateProfileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<User> getProfileImage(@RequestParam("username") String username,
+                                  @RequestParam("fileName") MultipartFile fileName) throws IOException, EmailExistException, UsernameExistException {
+        User user = this.userService.updateProfileImage(username, fileName);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
     @GetMapping(path = "/image/profile/{username}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getTempProfileImage(@PathVariable("username") String username) throws IOException {
 
-        String imageUrl = FileConstant.TEMP_PROFILE_IMAGE_BASE_URL + username;
+        String imageUrl = FileConstant.TEMP_PROFILE_IMAGE_BASE_URL
+                + username;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<byte[]> response = restTemplate.getForEntity(imageUrl, byte[].class);
