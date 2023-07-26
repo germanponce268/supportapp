@@ -16,18 +16,26 @@ import java.util.Date;
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
         private String userId;
+        @Column(name = "firstname")
         private String firstName;
+        @Column(name = "lastname")
         private String lastName;
         private String username;
         private String password;
         private String email;
+        @Column(name = "profileimageurl")
         private String profileImageUrl;
+        @Column(name = "lastlogindate")
         private Date lastLoginDate;
+        @Column(name = "lastloginddatedisplay")
         private Date lastLogindDateDisplay;
+        @Column(name = "joindate")
         private Date joinDate;
         private String role; //ROLE_USER, ROLE_ADMIN
         private String[] authorities;
+        @Column(name = "isactive")
         private boolean isActive;
+        @Column(name = "isnotlocked")
         private boolean isNotLocked;
 
         public User(){};
