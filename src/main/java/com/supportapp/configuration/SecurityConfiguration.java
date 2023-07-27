@@ -21,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
@@ -79,7 +80,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public CorsFilter corsFilter(){
+    public CorsConfigurationSource corsConfigurationSource(){
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin(CorsConstant.SUPPORTAPPWEB_URL);
@@ -88,7 +89,7 @@ public class SecurityConfiguration {
         corsConfiguration.setExposedHeaders(Arrays.asList(CorsConstant.EXPOSED_HEADERS));
         corsConfiguration.setAllowedMethods(Arrays.asList(CorsConstant.HTTP_METHODS));
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-        return new CorsFilter(urlBasedCorsConfigurationSource);
+        return urlBasedCorsConfigurationSource;
     }
 
 
