@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public User addNewUser(String firstName, String lastName, String username, String email, String role, boolean isActive, boolean isNonLocked, MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException {
         validateNewUsernameAndEmail(StringUtils.EMPTY, username, email);
         User newUser = new User();
-        newUser.setId(Long.valueOf(generateId()));
+        newUser.setUserId(generateId());
         String password = generatePassword();
         String encodedPassword = encodePassword(password);
         newUser.setFirstName(firstName);
