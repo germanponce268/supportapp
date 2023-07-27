@@ -5,4 +5,5 @@ public class CorsConstant {
     public static final String[] EXPOSED_HEADERS = {"Origin","Content-Type","Accept", "Jwt-Token", "Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"};
     public static final String[] HTTP_METHODS = {"GET", "POST", "PUT", "DELETE"};
     public static final String SUPPORTAPPWEB_URL = "https://supportappweb.netlify.app/";
+    public static final String SUPPORTAPPWEB_LOCAL = "http://localhost:4200";
 }
