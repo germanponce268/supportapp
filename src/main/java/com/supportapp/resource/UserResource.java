@@ -114,6 +114,7 @@ public class UserResource extends ExceptionHandling {
         User newUserImg = this.userService.updateProfileImage(user.getUsername(), profileImage);
         return new ResponseEntity(newUserImg, HttpStatus.OK);
     }
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/resetPassword/{email}")
     public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
         this.userService.resetPassword(email);
