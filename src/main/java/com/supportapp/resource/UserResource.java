@@ -12,6 +12,7 @@ import com.supportapp.service.UserService;
 import com.supportapp.utility.JWTTokenProvider;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,11 +43,11 @@ public class UserResource extends ExceptionHandling {
 
     @Autowired
     private JWTTokenProvider jwtTokenProvider;
-
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private UserService userService;
+
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody User user) throws EmailExistException, UsernameExistException, MessagingException {

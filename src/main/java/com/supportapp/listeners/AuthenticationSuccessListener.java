@@ -7,11 +7,14 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
-@Component
 public class AuthenticationSuccessListener{
     private LoginAttempService loginAttempService;
-    @Autowired
+
     public AuthenticationSuccessListener(){
+
+    }
+    @Autowired
+    public AuthenticationSuccessListener(LoginAttempService loginAttempService){
         this.loginAttempService = loginAttempService;
     }
     @EventListener

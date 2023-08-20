@@ -19,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -51,6 +54,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private EmailService emailService;
 
 
+
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder bCryptPasswordEncoder, LoginAttempService loginAttempService, EmailService emailService){
         this.emailService = emailService;
@@ -64,11 +68,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             LOGGER.error(USER_NOT_FOUND_BY_USERNAME + username);
             throw new UsernameNotFoundException(USER_NOT_FOUND_BY_USERNAME + username);
         } else {
-            try {
-                validateLoginAttemp(user);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+          //  try {
+            //    validateLoginAttemp(user);
+            //} catch (ExecutionException e) {
+             //   throw new RuntimeException(e);
+            //}
             user.setLastLogindDateDisplay(user.getLastLoginDate());
             user.setLastLoginDate(new Date());
             this.userRepository.save(user);
@@ -78,6 +82,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return userPrincipal;
         }
     }
+
 
     private void validateLoginAttemp(User user) throws ExecutionException {
         if(user.isNotLocked()){
