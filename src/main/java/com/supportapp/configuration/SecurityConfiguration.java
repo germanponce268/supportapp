@@ -84,7 +84,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource(){
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin(CorsConstant.SUPPORTAPPWEB_LOCAL);
+        corsConfiguration.addAllowedOrigin(CorsConstant.SUPPORTAPPWEB_URL);
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedHeaders(Arrays.asList(CorsConstant.ALLOWED_HEADERS));
         corsConfiguration.setExposedHeaders(Arrays.asList(CorsConstant.EXPOSED_HEADERS));
