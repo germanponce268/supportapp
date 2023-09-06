@@ -30,7 +30,7 @@ public class EmailService {
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email, false));
         message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(EmailConstant.CC_EMAIL, false));
         message.setSubject(EmailConstant.EMAIL_SUBJECT);
-        message.setText("Hello " + firstName + " \n\n Your new account is: " + password + " \n\n The Fckn Support Team");
+        message.setText("Hello " + firstName + " \n\n Tu nuevo password es: " + password + " \n\n Atte Soporte Tecnico");
         message.setSentDate(new Date());
         message.saveChanges();
         return message;
