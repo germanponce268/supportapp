@@ -3,7 +3,7 @@ package com.supportapp.constant;
 public class EmailConstant {
     public static final String SIMPLE_EMAIL_TRANSFER_PROTOCOL ="smtp" ;
     public static final String USERNAME ="germanponcedeveloper@gmail.com";
-    public static final String PASSWORD ="L@D3d10s";
+    public static final String PASSWORD ="qibfnrivbzpahzex";
     public static final String FROM_EMAIL ="support@getarrays.com";
     public static final String CC_EMAIL ="";
     public static final String EMAIL_SUBJECT ="LaDeDev - New Password";
