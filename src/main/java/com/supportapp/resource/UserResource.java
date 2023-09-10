@@ -2,6 +2,7 @@ package com.supportapp.resource;
 
 import com.supportapp.constant.FileConstant;
 import com.supportapp.domain.HttpResponse;
+import com.supportapp.domain.Key;
 import com.supportapp.domain.User;
 import com.supportapp.domain.UserPrincipal;
 import com.supportapp.exceptions.EmailExistException;

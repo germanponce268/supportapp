@@ -15,10 +15,17 @@ import java.util.Properties;
 
 @Service
 public class EmailService {
+
+    private KeyService keyService;
+
+    public EmailService(KeyService keyService){
+        this.keyService = keyService;
+    }
+
     public void SendNewPasswordEmail(String firstName, String password, String email) throws MessagingException {
         Message message = createEmail(firstName, password, email);
         Transport smtpTransport = (Transport) getEmailSession().getTransport(EmailConstant.SIMPLE_EMAIL_TRANSFER_PROTOCOL);
-        smtpTransport.connect(EmailConstant.GMAIL_SMTP_SERVER, EmailConstant.USERNAME, EmailConstant.PASSWORD);
+        smtpTransport.connect(EmailConstant.GMAIL_SMTP_SERVER, EmailConstant.USERNAME, this.keyService.getPassword(1L));
         smtpTransport.sendMessage(message, message.getAllRecipients());
         smtpTransport.close();
 
