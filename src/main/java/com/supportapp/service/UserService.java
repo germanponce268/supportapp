@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface UserService {
 
-    User register(String firstName, String lastName, String username, String email) throws EmailExistException, UsernameExistException, MessagingException;
+    User register(String firstName, String lastName, String username, String email) throws Exception;
 
     List<User> getusers();
     User findUserByUsername(String username);
@@ -23,7 +23,7 @@ public interface UserService {
 
     User updateUser(String currentUSername, String firstName,String lastName,String username,String email,String role,boolean isActive,boolean isNonLocked,MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException;
     void deleteUser(long id);
-    void resetPassword(String email) throws EmailNotFoundException, MessagingException;
+    void resetPassword(String email) throws Exception;
     User updateProfileImage(String username, MultipartFile profileImage) throws EmailExistException, UsernameExistException, IOException;
 
 }

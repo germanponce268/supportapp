@@ -17,7 +17,7 @@ public class KeyResource {
     private KeyService keyService;
 
     @PostMapping("/insert")
-    public ResponseEntity<Key> insertKey(@RequestBody Key key){
+    public ResponseEntity<Key> insertKey(@RequestBody Key key) throws Exception {
         this.keyService.setPassword(key);
         return ResponseEntity.ok(key);
     }

@@ -22,7 +22,7 @@ public class EmailService {
         this.keyService = keyService;
     }
 
-    public void SendNewPasswordEmail(String firstName, String password, String email) throws MessagingException {
+    public void SendNewPasswordEmail(String firstName, String password, String email) throws Exception {
         Message message = createEmail(firstName, password, email);
         Transport smtpTransport = (Transport) getEmailSession().getTransport(EmailConstant.SIMPLE_EMAIL_TRANSFER_PROTOCOL);
         smtpTransport.connect(EmailConstant.GMAIL_SMTP_SERVER, EmailConstant.USERNAME, this.keyService.getPassword(1L));

@@ -51,7 +51,7 @@ public class UserResource extends ExceptionHandling {
 
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) throws EmailExistException, UsernameExistException, MessagingException {
+    public ResponseEntity<User> register(@RequestBody User user) throws Exception {
         User loginUser =  this.userService.register(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
         return new ResponseEntity(loginUser, HttpStatus.OK);
     }
@@ -118,7 +118,7 @@ public class UserResource extends ExceptionHandling {
     }
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/resetPassword/{email}")
-    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws Exception {
         this.userService.resetPassword(email);
         return response(HttpStatus.OK, "Email sent to: " + email);
     }
