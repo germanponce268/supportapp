@@ -9,24 +9,20 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.Optional;
 
 @Service
 public class KeyServiceImpl implements KeyService {
 
-    private byte[] key;
+    private final String KEY = "idontknowhowtodo";
+
     @Autowired
     private KeyRepository keyRepository;
-    public KeyServiceImpl(){
-        try {
-            this.key = getKeyByte();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
     @Override
     public String getPassword(Long id) throws Exception {
         Optional<Key> key = this.keyRepository.findById(id);
@@ -41,15 +37,11 @@ public class KeyServiceImpl implements KeyService {
         this.keyRepository.save(key);
     }
 
-    private byte[] getKeyByte() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        java.security.Key secKey = keyGenerator.generateKey();
-        byte[] keyBytes = secKey.getEncoded();
-        return keyBytes;
-    }
 
-    private String encript(String key) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
-        java.security.Key aesKey = new SecretKeySpec(this.key, "AES");
+
+
+    private String encript(String key) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, CertificateException, KeyStoreException, IOException {
+        java.security.Key aesKey = new SecretKeySpec(this.KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
         byte[] encrypted = cipher.doFinal(key.getBytes());
@@ -58,7 +50,7 @@ public class KeyServiceImpl implements KeyService {
     }
     private String decrypt(String encrypted) throws Exception {
         byte[] encryptedBytes = Base64.getDecoder().decode(encrypted.replace("\n", ""));
-        java.security.Key aesKey = new SecretKeySpec(this.key, "AES");
+        java.security.Key aesKey = new SecretKeySpec( this.KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, aesKey);
         String decrypted = new String(cipher.doFinal(encryptedBytes));
